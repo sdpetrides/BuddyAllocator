@@ -1,6 +1,6 @@
-This is the readme for Systems Project 1.0: A better malloc() and free()
-
-Stephen Petrides and Andrew Macneille
+Systems Project 1.0: A better malloc() and free()
+Stephen Petrides & Andrew Macneille
+6 October 2016
 
 Steps:
 
@@ -10,5 +10,10 @@ Steps:
 	4. Write testing program memgrind.c
 	5. Write two new workloads
 	6. Test with 6 total workloads (100 times)
+
+
+Compile: 
+
+gcc -Wall -g -o memgrind memgrind.c mymalloc.c
 
 
