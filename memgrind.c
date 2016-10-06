@@ -4,7 +4,7 @@
 
 // MACROS
 #define malloc(size) mymalloc( size, __FILE__, __LINE__)
-#define free(size) myfree( size, __FILE__, __LINE__)
+#define free(ptr) myfree( ptr, __FILE__, __LINE__)
 
 int main(int argc, char const *argv[]) {
 	int * p;
