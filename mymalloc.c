@@ -10,7 +10,7 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 	void * ptr;
 	ptr = &myblock;
 
-	fprintf(stderr, "Error: %s.%d\n", file, line);
+	//fprintf(stderr, "Error: %s.%d\n", file, line);
 
 	return ptr;
 }
@@ -20,5 +20,5 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 
 */
 void myfree(void * ptr, char * file, int line) {
-	fprintf(stderr, "Error: %s.%d\n", file, line);
+	//fprintf(stderr, "Error: %s.%d\n", file, line);
 }

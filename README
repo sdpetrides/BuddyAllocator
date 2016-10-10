@@ -15,5 +15,3 @@ Steps:
 Compile: 
 
 gcc -Wall -g -o memgrind memgrind.c mymalloc.c
-
-
