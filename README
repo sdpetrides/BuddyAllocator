@@ -5,13 +5,6 @@ Stephen Petrides & Andrew Macneille
 Steps:
 
 	1. Implement malloc() and free() with static char myblock[5000]
+		Buddy Allocator
 	2. Add error detection to methods
-	3. Add error detection responses to methods
-	4. Write testing program memgrind.c
-	5. Write two new workloads
-	6. Test with 6 total workloads (100 times)
-
-
-Compile: 
-
-gcc -Wall -g -o memgrind memgrind.c mymalloc.c
+	3. Write workloads in memgrind.c
