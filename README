@@ -4,7 +4,7 @@ Stephen Petrides & Andrew Macneille
 
 Steps:
 
-	1. Implement malloc() and free() with static char myblock[5000]
+	1. Implement malloc() and free() with static char myblock[]
 		Buddy Allocator
 	2. Add error detection to methods
 	3. Write workloads in memgrind.c

@@ -46,6 +46,9 @@ void testB() {
 
 int main(int argc, char const *argv[]) {
 
+	// Initialize myblock
+	init_block();
+
 	// Create function pointers for each function
 	void (*fptrA)() = &testA;
 	void (*fptrB)() = &testB;
