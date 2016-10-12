@@ -8,3 +8,18 @@ Steps:
 		Buddy Allocator
 	2. Add error detection to methods
 	3. Write workloads in memgrind.c
+
+
+algo(m, n):
+	if (n <= m.size):
+		if (m.allo):
+			jumpToPartner
+			// more steps
+		else if (n == m.size):
+			allocate()
+		else:
+			loop until (n == m.size):
+				partition()
+	else:
+		jumpToNextNBlock()
+		// probobly call algo() again

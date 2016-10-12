@@ -12,7 +12,6 @@ void testB();
 
 /* testA: malloc() 1 byte 3000 times, then free() the 3000 1 byte pointers one by one */
 void testA() {
-	//printf("testA\n");
 	int i = 0;
 	char * p;
 
@@ -33,7 +32,6 @@ void testA() {
 
 /* testB: malloc() 1 byte and immediately free it 3000 times in a row */
 void testB() {
-	//printf("testB\n");
 	int i = 0;
 
 	while (i < 3000) {
