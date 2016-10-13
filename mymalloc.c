@@ -9,17 +9,14 @@ typedef struct meta {
 	unsigned char size : 6;		// ______00 - n where (2^n)-1 is the block size
 } Meta;
 
-typedef struct blk {
-	Meta m;						// Metadata
-	char * data;				// ptr to be returned
-} Blk; 
+void unpack(Meta * m, int pos);
 
 static char myblock[8192];
 
-void print_meta(Blk * ptr) {
-	printf("Size: %d\n", (unsigned int)ptr->m.size);
-	printf("Left: %d\n", (unsigned int)ptr->m.left);
-	printf("Allo: %d\n", (unsigned int)ptr->m.allo);
+/* Fills myblock with zeros and creates first metadata */
+void init_block() {
+	memset(&myblock, '\0', 8192);
+	memset(&myblock, 54, 1);
 }
 
 /* Returns log base 2 of a double d */
@@ -53,35 +50,42 @@ void unpack(Meta * m, int pos) {
 	memset(m, myblock[pos], 1);
 }
 
-/* Fills myblock with zeros and creates first metadata */
-void init_block() {
-	memset(&myblock, '\0', 8192);
-	memset(&myblock, 54, 1);
-}
-int is_left(int n, int pos){
+/* Returns whether position at level n is left or right partner */
+int is_left(int n, int pos) {
+
+	// Manipulate bits to set nth bit on
 	int k = 1;
 	k<<=(n);
 	
+	// Manipulate bits to zero bits above n
 	unsigned int p = (unsigned int)pos;
 	p<<=(31-n);
 	p>>=(31-n);
 
-	if(k==p){
-		return 0;
-	}else{
-		return 2;
+	if (k == p) {
+		return 0;	// Right
+	} else {
+		return 1;	// Left
 	}
 }
-void merge(int pos, int pos2, int n){
+
+/*  Mergee two unallocated blocks with same size */
+void merge(int pos, int pos2, int n) {
 	
+	// Create new meta and set size field
 	char newMeta = (n+1)<<2;
+
+	// Set left field
+	if (is_left(n+1, pos)) {
+		newMeta+=2;
+	}
+
+	// Add new meta
 	myblock[pos] = newMeta;
-	myblock[pos2] = 0;
-	
-		
+
+	// Delete meta on right partner
+	myblock[pos2] = 0;		
 }
-
-
 
 /* MYMALLOC */
 void * mymalloc(size_t reqSize, char * file, int line) {
@@ -102,6 +106,7 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 		// Read metadata
 		unpack(m, pos);
 
+		// Debugging
 		if (m->size == 0) {
 			printf("m.size: %d\n", m->size);
 			printf("pos:    %d\n", pos);
@@ -151,74 +156,67 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 	}
 
 	fprintf(stderr, "Error: %s.%d\n", file, line);
+
 	return NULL;
 }
-
-
-
-
-
-
 
 /* MYFREE */
 void myfree(void * ptr, char * file, int line) {
 	
+	// Error Checking
 	if (ptr <= (void *)&myblock || ptr > (void *)(&myblock + 8192)) {
 		fprintf(stderr, "Error: %s.%d\n", file, line);
 	}
+
+	// Get position and check if valid
 	int pos = (int)(ptr=&myblock-1);
+
+	// Check if valid metadata location
+	if (pos%2 == 1 || myblock[pos] == 0) {
+		fprintf(stderr, "Error: %s.%d\n", file, line);
+		return;
+	}
+
+
+	// Initialize variables for merge
 	unsigned char c1 = 0;
 	unsigned char c2 = 0;
-	Meta * m1 = memset(&c1,0,1); Meta * m2 = memset(&c2,0,1);
+	Meta * m1 = memset(&c1, 0, 1); 
+	Meta * m2 = memset(&c2, 0, 1);
 	unpack(m1,pos);
+
+	// Change allocated field
 	myblock[pos] = myblock[pos] - 1;
 
-	while(pos >= 0 && pos <= 8196){
+	while (pos >= 0 && pos <= 8196){
+		// Read metadata
 		unpack(m1,pos);
 
-		if(m1->left){
+		if (m1->left) {	// Left Partner
+
+			// Get position of other partner and read metadata
 			int pos2 = jump_next(m1->size, pos);
 			unpack(m2,pos2);
 	
-			if(m2->allo || m2->size != m1->size){
+			// Merge or break
+			if (m2->allo || m2->size != m1->size) {
 				break;
+			} else {
+				merge(pos, pos2, m1->size);
 			}
-		
-			else{
-				myblock[pos] += is_left(m1->size+1,pos);
-				merge(pos,pos2,m1->size);
-			}
-		}
-		else{
+
+		} else {		// Right Partner
+
+			// Get position of other partner and read metadata
 			int pos2 = jump_back(m2->size,pos);
 			unpack(m2,pos);
-			if(m2->allo || m2->size != m1->size){
+
+			// Merge or break
+			if (m2->allo || m2->size != m1->size) {
 				break;
-			}
-			else{
-				myblock[pos2] += is_left(m2->size+1,pos2);
-				merge(pos2,pos,m1->size); 
-			}
-				
+			} else {
+				merge(pos2, pos, m1->size); 
+			}	
 		}
-		
 	}
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
