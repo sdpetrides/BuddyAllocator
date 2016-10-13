@@ -1,0 +1,19 @@
+n:      3
+Allocate
+Pos:    0
+M1:     15
+Ptr:    0xE86C061
+
+n:      6
+Allocate
+Pos:    64
+M1:     25
+Ptr:    0xE86C0A1
+
+n:      7
+Allocate
+Pos:    128
+M1:     29
+Ptr:    0xE86C0E1
+
+n:      6

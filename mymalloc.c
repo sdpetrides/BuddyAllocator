@@ -49,7 +49,7 @@ int jump_back(int n, int pos) {
 
 /* Fills a Meta struct with metadata at pos */
 void unpack(Meta * m, int pos) {
-	memcpy(m, &myblock+pos, 1);
+	memset(m, myblock[pos], 1);
 }
 
 /* Fills myblock with zeros and creates first metadata */
@@ -68,13 +68,18 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 
 	// Traverse heap to find block of correct size - algo(n)
 	int n = size_to_n(reqSize);
+	printf("n:      %d\n", n);
 	int pos = 0;
-	unsigned char c = '\0';
-	Meta * m = &c;
+	unsigned char c = 0;
+	Meta * m = memset(&c, 0, 1);
 	
 	while (pos < 8192) {
 		// Read metadata
 		unpack(m, pos);
+
+		if (m->size == 0) {
+			exit(0);
+		}
 
 		if (n <= m->size) {
 			if (m->allo == 1) {				
@@ -83,7 +88,11 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 				continue;
 			} else if (m->size == n) {		
 				// Allocate
+				printf("Allocate\n");
 				myblock[pos]+=1;
+				printf("Pos:    %d\n", (int)pos);
+				printf("M1:     %d\n", (int)myblock[pos]);
+				printf("Ptr:    0x%X\n\n", (int)&myblock+pos+1);
 				return &myblock+pos+1;
 			} else { 						
 				// Partition
@@ -92,8 +101,8 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 				int partner = jump_next((m->size)-1, pos);
 
 				// Set Left
-				char meta_1 = '\0';
-				char meta_2 = 2;
+				char meta_1 = 2;
+				char meta_2 = 0;
 				
 				// Set Size
 				char s = ((m->size)-1)<<2;
@@ -101,8 +110,12 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 				meta_2 = (meta_2 | s);
 
 				// Fill in metadata
-				memcpy(&myblock+pos, &meta_1, 1);
-				memcpy(&myblock+partner, &meta_2, 1);
+				//memset(&myblock+pos, meta_1, 1);
+				myblock[pos] = meta_1;
+				//printf("m.size: %d\n", (int)&myblock+pos - (int)&myblock+partner);
+				myblock[partner] = meta_2;
+				//printf("M1:     %d\n", (int)myblock[pos]);
+				//printf("M2:     %d\n\n", (int)myblock[partner]);
 
 				// Continue on same position with new size of block
 				continue;
