@@ -58,6 +58,30 @@ void init_block() {
 	memset(&myblock, '\0', 8192);
 	memset(&myblock, 54, 1);
 }
+int is_left(int n, int pos){
+	int k = 1;
+	k<<=(n);
+	
+	unsigned int p = (unsigned int)pos;
+	p<<=(31-n);
+	p>>=(31-n);
+
+	if(k==p){
+		return 0;
+	}else{
+		return 2;
+	}
+}
+void merge(int pos, int pos2, int n){
+	
+	char newMeta = (n+1)<<2;
+	myblock[pos] = newMeta;
+	myblock[pos2] = 0;
+	
+		
+}
+
+
 
 /* MYMALLOC */
 void * mymalloc(size_t reqSize, char * file, int line) {
@@ -130,6 +154,12 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 	return NULL;
 }
 
+
+
+
+
+
+
 /* MYFREE */
 void myfree(void * ptr, char * file, int line) {
 	
@@ -137,18 +167,41 @@ void myfree(void * ptr, char * file, int line) {
 		fprintf(stderr, "Error: %s.%d\n", file, line);
 	}
 	int pos = (int)(ptr=&myblock-1);
-	unsigned char c1 = 0; c2 = 0;
-	Meta * m1 = &c1; Meta * m2 = &c2;
+	unsigned char c1 = 0;
+	unsigned char c2 = 0;
+	Meta * m1 = memset(&c1,0,1); Meta * m2 = memset(&c2,0,1);
 	unpack(m1,pos);
 	myblock[pos] = myblock[pos] - 1;
 
 	while(pos >= 0 && pos <= 8196){
 		unpack(m1,pos);
 
-		if(m1.left){
-			int pos2 = jump_next(int m1.size, pos);
+		if(m1->left){
+			int pos2 = jump_next(m1->size, pos);
 			unpack(m2,pos2);
+	
+			if(m2->allo || m2->size != m1->size){
+				break;
+			}
+		
+			else{
+				myblock[pos] += is_left(m1->size+1,pos);
+				merge(pos,pos2,m1->size);
+			}
 		}
+		else{
+			int pos2 = jump_back(m2->size,pos);
+			unpack(m2,pos);
+			if(m2->allo || m2->size != m1->size){
+				break;
+			}
+			else{
+				myblock[pos2] += is_left(m2->size+1,pos2);
+				merge(pos2,pos,m1->size); 
+			}
+				
+		}
+		
 	}
 	
 
