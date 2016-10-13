@@ -4,9 +4,9 @@
 #include <math.h>
 
 typedef struct meta {
-	unsigned char size : 6;		// ______00 - n where (2^n)-1 is the block size
-	unsigned char left : 1;		// 000000_0 - first or second
 	unsigned char allo : 1;		// 0000000_ - allocated
+	unsigned char left : 1;		// 000000_0 - first or second
+	unsigned char size : 6;		// ______00 - n where (2^n)-1 is the block size
 } Meta;
 
 typedef struct blk {
@@ -54,8 +54,8 @@ void unpack(Meta * m, int pos) {
 
 /* Fills myblock with zeros and creates first metadata */
 void init_block() {
-	memset(&myblock[0], '\0', 8192);
-	myblock[0] = 54;
+	memset(&myblock, '\0', 8192);
+	memset(&myblock, 54, 1);
 }
 
 /* MYMALLOC */
@@ -77,24 +77,35 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 		unpack(m, pos);
 
 		if (n <= m->size) {
-			if (m->allo == 1) {
+			if (m->allo == 1) {				
 				// Jump
 				pos = jump_next(n, pos);
 				continue;
-			} else if (m->size == n) {
+			} else if (m->size == n) {		
 				// Allocate
 				myblock[pos]+=1;
 				return &myblock+pos+1;
-			} else {
+			} else { 						
 				// Partition
-					// create metadata for right side
-						// set meta->allo to 0
-						// set meta->left to 0
-						// set meta->size to meta->size-1
-					// if new level is correct
-						return &myblock+1;
-					// else 
-						// continue
+
+				// Get partner position
+				int partner = jump_next((m->size)-1, pos);
+
+				// Set Left
+				char meta_1 = '\0';
+				char meta_2 = 2;
+				
+				// Set Size
+				char s = ((m->size)-1)<<2;
+				meta_1 = (meta_1 | s);
+				meta_2 = (meta_2 | s);
+
+				// Fill in metadata
+				memcpy(&myblock+pos, &meta_1, 1);
+				memcpy(&myblock+partner, &meta_2, 1);
+
+				// Continue on same position with new size of block
+				continue;
 			}
 		} else {
 			// Jump
