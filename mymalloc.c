@@ -43,8 +43,9 @@ int jump_next(int n, int pos) {
 
 /* Returns the position of the left half of a pair */
 int jump_back(int n, int pos) {
-	// if right block, find the left block
-	return 1;
+	int bits = pos>>(n);
+	bits-=1;
+	return bits<<(n);
 }
 
 /* Fills a Meta struct with metadata at pos */
@@ -78,6 +79,8 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 		unpack(m, pos);
 
 		if (m->size == 0) {
+			printf("m.size: %d\n", m->size);
+			printf("pos:    %d\n", pos);
 			exit(0);
 		}
 
@@ -110,12 +113,8 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 				meta_2 = (meta_2 | s);
 
 				// Fill in metadata
-				//memset(&myblock+pos, meta_1, 1);
 				myblock[pos] = meta_1;
-				//printf("m.size: %d\n", (int)&myblock+pos - (int)&myblock+partner);
 				myblock[partner] = meta_2;
-				//printf("M1:     %d\n", (int)myblock[pos]);
-				//printf("M2:     %d\n\n", (int)myblock[partner]);
 
 				// Continue on same position with new size of block
 				continue;
@@ -127,10 +126,46 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 		}
 	}
 
+	fprintf(stderr, "Error: %s.%d\n", file, line);
 	return NULL;
 }
 
 /* MYFREE */
 void myfree(void * ptr, char * file, int line) {
-	//fprintf(stderr, "Error: %s.%d\n", file, line);
+	
+	if (ptr <= (void *)&myblock || ptr > (void *)(&myblock + 8192)) {
+		fprintf(stderr, "Error: %s.%d\n", file, line);
+	}
+	int pos = (int)(ptr=&myblock-1);
+	unsigned char c1 = 0; c2 = 0;
+	Meta * m1 = &c1; Meta * m2 = &c2;
+	unpack(m1,pos);
+	myblock[pos] = myblock[pos] - 1;
+
+	while(pos >= 0 && pos <= 8196){
+		unpack(m1,pos);
+
+		if(m1.left){
+			int pos2 = jump_next(int m1.size, pos);
+			unpack(m2,pos2);
+		}
+	}
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
