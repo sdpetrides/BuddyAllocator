@@ -10,6 +10,8 @@ typedef struct meta {
 	unsigned char size : 6;		// ______00 - n where (2^n)-1 is the block size
 } Meta;
 
+static char myblock[8192];
+
 void unpack(Meta * m, int pos);
 
 /* Fills myblock with zeros and creates first metadata */

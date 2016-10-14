@@ -1,9 +1,6 @@
 #ifndef MYMALLOC_H
 #define MYMALLOC_H
 
-// Globals
-static char myblock[8192];
-
 // Functions
 void init_block();
 double log2(double d);
