@@ -44,73 +44,87 @@ void testB() {
 	return;
 }
 
-/* testD: malloc() 1 byte 3000 times, then free() the 3000 1 byte pointers one by one 
-void testD() {
-	int i = 0;
-	char * p[3000];
+/* testC: Randomly choose between a 1 byte malloc() or free() 6000 times */ 
+void testC() {
+	srand(time(NULL));
+	int i = 1;
+	int j = 0;
+	char * p[6000];
 
-	while (i < 3000) {
-		int random = rand() % 100;
-		p[i] = (char *)malloc(sizeof(char)*random);
-		i++;
+	p[0] = (char *)malloc(sizeof(char)*1);	
+
+	while (i+j < 6000) {
+		int random = rand() % 2;
+
+		if (random != 0) {
+			p[i] = (char *)malloc(sizeof(char)*1);
+			i++;
+		} else if (p[j] != 0) {
+			free(p[j]);
+			j++;
+		} else {
+			p[i] = (char *)malloc(sizeof(char)*1);
+			i++;
+		}
 	}
 
-	i = 0;
-	
-	while (i < 3000) {
-		free(p[i]);
-		i++;
-	}
-
-	return;
-} */
-
-/* testD: malloc() 1 byte 3000 times, then free() the 3000 1 byte pointers one by one 
-void testD() {
-	int i = 0;
-	char * p[3000];
-
-	while (i < 3000) {
-		int random = rand() % 100;
-		p[i] = (char *)malloc(sizeof(char)*random);
-		i++;
-	}
-
-	i = 0;
-	
-	while (i < 3000) {
-		free(p[i]);
-		i++;
+	while (j <= i) {
+		free(p[j]);
+		j++;
 	}
 
 	return;
-} */
+}
+
+/* testD: Randomly choose between a randomly-sized malloc() or free 6000 times */
+void testD() {
+	srand(time(NULL));
+	int i = 1;
+	int j = 0;
+	char * p[6000];
+
+	p[0] = (char *)malloc(sizeof(char)*(2));	
+
+	while (i+j < 6000) {
+		int random = rand() % 2;
+
+		if (random != 0) {
+			p[i] = (char *)malloc(sizeof(char)*(2));
+			i++;
+		} else if (p[j] != 0) {
+			free(p[j]);
+			j++;
+		} else {
+			p[i] = (char *)malloc(sizeof(char)*(2));
+			i++;
+		}
+	}
+
+	while (j <= i) {
+		free(p[j]);
+		j++;
+	}
+
+	return;
+} 
 
 int main(int argc, char const *argv[]) {
+
+	// Inititialize variables for workflow
+	int i, j;
 
 	// Initialize myblock
 	init_block();
 
-	// Create function pointers for each function
-	//void (*fptrA)() = &testA;
-	//void (*fptrB)() = &testB;
-	//void (*fptrC)() = &testC;
-
-	// Create and initialize fptr array
-	//void (*fptr)() = &testA;
-	//void (**fptr)() = &fptrA;
-	//fptr[1] = fptrB;
-	//fptr[2] = fptrC;
-
-	// Inititialize variables for workflow
-	double time_elapsed_in_seconds = 0.0;
-	int i, j;
-
 	// Loop through fptr array
-	for (j = 0; j < 2; j++) {
+	for (j = 0; j < 4; j++) {
+
+		// Initialize time elapsed
+		double time_elapsed_in_seconds = 0.0;
 
 		// Run the fuction 100 times and calculate total time elapsed
-		for (i = 0; i < 100; i++) {
+		for (i = 0; i < 1; i++) {
+
 			clock_t start = clock();
 			switch(j) {
 				case 0:
@@ -119,17 +133,25 @@ int main(int argc, char const *argv[]) {
 				case 1:
 					testB();
 					break;
-			//case 0:
-			//	break;
-			//case 0:
-			//	break;
+				case 2:
+					testC();
+					break;
+				case 3:
+					testD();
+					break;
+				case 4:
+					//testE();
+					break;
+				case 5:
+					//testF();
+					break;
 			}
 			clock_t end = clock();
 			time_elapsed_in_seconds+=(end - start)/(double)CLOCKS_PER_SEC;
 		}
 
 		// Print the after execution time of 100 runs
-		printf("Time Elapsed test%d: %f secs\n", j, time_elapsed_in_seconds/100);
+		printf("Time Elapsed test%d: %f secs\n", j, time_elapsed_in_seconds/1);
 	}
 
 	return 0;

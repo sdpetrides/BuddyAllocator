@@ -36,7 +36,14 @@ int size_to_n(size_t reqSize) {
 int jump_next(int n, int pos) {
 	int bits = pos>>(n);
 	bits+=1;
-	return bits<<(n);
+	int ret = bits<<(n);
+
+	if (ret == 8192) {
+		return ret;
+	} else {
+		return ret;
+	}
+	
 }
 
 /* Returns the position of the left half of a pair */
@@ -93,12 +100,11 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 
 	// Check if too big
 	if (reqSize > 8191) {
-		fprintf(stderr, "Error: %s.%d\n", file, line);
+		fprintf(stderr, "Error: Requested size too large %s.%d\n", file, line);
 	}
 
 	// Traverse heap to find block of correct size - algo(n)
 	int n = size_to_n(reqSize);
-	//printf("n:        %d\n", n);
 	int pos = 0;
 	unsigned char c = 0;
 	Meta * m = memset(&c, 0, 1);
@@ -121,8 +127,7 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 				// Allocate
 				myblock[pos]+=1;
 				pos+=1;
-				//printf("Position: %d\n", pos);
-				//printf("Allocate: %p\n", (void*)((long int)&myblock+pos));
+				//printf("Allocate: %d\n", pos);
 				return (void*)((long int)&myblock+pos);
 			} else { 						
 				// Partition
@@ -153,9 +158,9 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 		}
 	}
 
-	fprintf(stderr, "Error: %s.%d\n", file, line);
+	fprintf(stderr, "Error: Did not allocate  %s.%d %d\n", file, line, pos);
 
-	return NULL;
+	return 0;
 }
 
 /* MYFREE */
@@ -163,17 +168,16 @@ void myfree(void * ptr, char * file, int line) {
 	
 	// Error Checking
 	if (ptr <= (void *)&myblock || ptr > (void *)(&myblock + 8192)) {
-		fprintf(stderr, "Error: %s.%d\n", file, line);
+		//fprintf(stderr, "Error: Address out of bounds.   %s.%d %p\n", file, line, ptr);
+		return;
 	}
-
-	//printf("Free:     %p\n", ptr);
 
 	// Get position
 	int pos = (int)(ptr-(void *)&myblock-1);
 
 	// Check if valid metadata location
 	if (pos%2 == 1 || myblock[pos] == 0) {
-		fprintf(stderr, "Error: %s.%d\n", file, line);
+		//fprintf(stderr, "Error: Invalid memory location. %s.%d %p\n", file, line, ptr);
 		return;
 	}
 
@@ -196,10 +200,18 @@ void myfree(void * ptr, char * file, int line) {
 
 			// Get position of other partner and read metadata
 			int pos2 = jump_next(m1->size, pos);
-			unpack(m2,pos2);
+
+			if (pos2 >= 0 && pos2 <= 8190) {
+				unpack(m2,pos2);
+			} else {
+				//printf("Freed:    %d\n", pos);
+				break;
+			}
+			
 	
 			// Merge or break
 			if (m2->allo || m2->size != m1->size) {
+				//printf("Freed:    %d\n", pos);
 				break;
 			} else {
 				merge(pos, pos2, m1->size);
@@ -209,10 +221,17 @@ void myfree(void * ptr, char * file, int line) {
 
 			// Get position of other partner and read metadata
 			int pos2 = jump_back(m2->size,pos);
-			unpack(m2,pos2);
+
+			if (pos2 >= 0 && pos2 <= 8190) {
+				unpack(m2,pos2);
+			} else {
+				//printf("Freed:    %d\n", pos);
+				break;
+			}
 
 			// Merge or break
 			if (m2->allo || m2->size != m1->size) {
+				//printf("Freed:    %d\n", pos);
 				break;
 			} else {
 				merge(pos2, pos, m1->size); 
