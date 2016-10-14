@@ -111,7 +111,7 @@ void testD() {
 	return;
 }
 
-/* testF: malloc 100 2bytes and frees 100 2bytes 10 times */
+/* testE: malloc 100 2bytes and frees 100 2bytes 10 times */
 void testE() {
 	int i = 0;
 	int j = 0;

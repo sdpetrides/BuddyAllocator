@@ -1,3 +1,60 @@
 Assignment 1.0: A better malloc() and free() Testcases
 
-Describe your two workloads and why you included them.
+/* testE: malloc 100 2bytes and frees 100 2bytes 10 times */
+void testE() {
+	int i = 0;
+	int j = 0;
+	int k = 0;
+	int m = 0;
+	char * p[6000];	
+
+	while (i < 6000) {
+		k = 0;
+		while (k < 100) {
+			p[i] = (char *)malloc(sizeof(char)*(2));
+			i++; k++;
+		}
+
+		m = 0;
+		while (m < 100) {
+			free(p[j]);
+			j++; m++;
+		}
+	}
+
+	return;
+}
+
+/* testF: malloc 2000 2bytes, frees 1000 2bytes, malloc 2000 2bytes, frees 3000 2bytes */
+void testF() {
+	int i = 0;
+	int j = 0;
+	char * p[6000];
+
+
+	while (i < 2000) {
+		p[i] = (char *)malloc(sizeof(char)*(2));
+		i++;
+	}
+
+	while (j < 1000) {
+		free(p[j]);
+		j++;
+	}
+
+	while (i < 2000) {
+		p[i] = (char *)malloc(sizeof(char)*(2));
+		i++;
+	}
+
+	while (j < 4000) {
+		free(p[j]);
+		j++;
+	}
+
+	return;
+}
+
+These test cases are here to simulate the real memory allocation patterns. 
+TestE simulates when many mallocs are called and some are freed. Then more mallocs are called and the rest are eventually freed.
+TestF simulates when mallocs are called and freed in large blocks.
