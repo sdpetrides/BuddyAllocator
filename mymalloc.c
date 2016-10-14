@@ -127,7 +127,6 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 				// Allocate
 				myblock[pos]+=1;
 				pos+=1;
-				//printf("Allocate: %d\n", pos);
 				return (void*)((long int)&myblock+pos);
 			} else { 						
 				// Partition
@@ -168,7 +167,7 @@ void myfree(void * ptr, char * file, int line) {
 	
 	// Error Checking
 	if (ptr <= (void *)&myblock || ptr > (void *)(&myblock + 8192)) {
-		//fprintf(stderr, "Error: Address out of bounds.   %s.%d %p\n", file, line, ptr);
+		fprintf(stderr, "Error: %s.%d\n", file, line);
 		return;
 	}
 
@@ -177,7 +176,7 @@ void myfree(void * ptr, char * file, int line) {
 
 	// Check if valid metadata location
 	if (pos%2 == 1 || myblock[pos] == 0) {
-		//fprintf(stderr, "Error: Invalid memory location. %s.%d %p\n", file, line, ptr);
+		fprintf(stderr, "Error: %s.%d\n", file, line);
 		return;
 	}
 
@@ -204,14 +203,11 @@ void myfree(void * ptr, char * file, int line) {
 			if (pos2 >= 0 && pos2 <= 8190) {
 				unpack(m2,pos2);
 			} else {
-				//printf("Freed:    %d\n", pos);
 				break;
 			}
-			
-	
+
 			// Merge or break
 			if (m2->allo || m2->size != m1->size) {
-				//printf("Freed:    %d\n", pos);
 				break;
 			} else {
 				merge(pos, pos2, m1->size);
@@ -225,13 +221,11 @@ void myfree(void * ptr, char * file, int line) {
 			if (pos2 >= 0 && pos2 <= 8190) {
 				unpack(m2,pos2);
 			} else {
-				//printf("Freed:    %d\n", pos);
 				break;
 			}
 
 			// Merge or break
 			if (m2->allo || m2->size != m1->size) {
-				//printf("Freed:    %d\n", pos);
 				break;
 			} else {
 				merge(pos2, pos, m1->size); 

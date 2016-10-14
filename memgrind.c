@@ -10,6 +10,13 @@ void testB();
 #define malloc(size) mymalloc( size, __FILE__, __LINE__)
 #define free(ptr) myfree( ptr, __FILE__, __LINE__)
 
+int rando[20] = {
+	56, 73,  2,  8, 76,
+	56, 66, 21, 13,  4,
+	99, 80, 25,  6, 38,
+	10, 64, 12, 32, 71
+};
+
 /* testA: malloc() 1 byte 3000 times, then free() the 3000 1 byte pointers one by one */
 void testA() {
 	int i = 0;
@@ -46,17 +53,15 @@ void testB() {
 
 /* testC: Randomly choose between a 1 byte malloc() or free() 6000 times */ 
 void testC() {
-	srand(time(NULL));
 	int i = 1;
 	int j = 0;
 	char * p[6000];
 
 	p[0] = (char *)malloc(sizeof(char)*1);	
 
-	while (i+j < 6000) {
-		int random = rand() % 2;
+	while (i+j < 1000) {
 
-		if (random != 0) {
+		if ((i+j)%2 != 0) {
 			p[i] = (char *)malloc(sizeof(char)*1);
 			i++;
 		} else if (p[j] != 0) {
@@ -78,24 +83,22 @@ void testC() {
 
 /* testD: Randomly choose between a randomly-sized malloc() or free 6000 times */
 void testD() {
-	srand(time(NULL));
 	int i = 1;
 	int j = 0;
 	char * p[6000];
 
-	p[0] = (char *)malloc(sizeof(char)*(2));	
+	p[0] = (char *)malloc(sizeof(char)*(20));	
 
 	while (i+j < 6000) {
-		int random = rand() % 2;
 
-		if (random != 0) {
-			p[i] = (char *)malloc(sizeof(char)*(2));
+		if ((i+j)%2 != 0) {
+			p[i] = (char *)malloc(sizeof(char)*(((i%2)+1)*20));
 			i++;
 		} else if (p[j] != 0) {
 			free(p[j]);
 			j++;
 		} else {
-			p[i] = (char *)malloc(sizeof(char)*(2));
+			p[i] = (char *)malloc(sizeof(char)*(((i%2)+1)*20));
 			i++;
 		}
 	}
@@ -106,24 +109,80 @@ void testD() {
 	}
 
 	return;
-} 
+}
+
+/* testF: malloc 100 2bytes and frees 100 2bytes 10 times */
+void testE() {
+	int i = 0;
+	int j = 0;
+	int k = 0;
+	int m = 0;
+	char * p[6000];	
+
+	while (i < 6000) {
+		k = 0;
+		while (k < 100) {
+			p[i] = (char *)malloc(sizeof(char)*(2));
+			i++; k++;
+		}
+
+		m = 0;
+		while (m < 100) {
+			free(p[j]);
+			j++; m++;
+		}
+	}
+
+	return;
+}
+
+/* testF: malloc 2000 2bytes, frees 1000 2bytes, malloc 2000 2bytes, frees 3000 2bytes */
+void testF() {
+	int i = 0;
+	int j = 0;
+	char * p[6000];
+
+
+	while (i < 2000) {
+		p[i] = (char *)malloc(sizeof(char)*(2));
+		i++;
+	}
+
+	while (j < 1000) {
+		free(p[j]);
+		j++;
+	}
+
+	while (i < 2000) {
+		p[i] = (char *)malloc(sizeof(char)*(2));
+		i++;
+	}
+
+	while (j < 4000) {
+		free(p[j]);
+		j++;
+	}
+
+	return;
+}
+
 
 int main(int argc, char const *argv[]) {
 
 	// Inititialize variables for workflow
 	int i, j;
 
-	// Initialize myblock
-	init_block();
-
 	// Loop through fptr array
-	for (j = 0; j < 4; j++) {
+	for (j = 0; j < 6; j++) {
 
 		// Initialize time elapsed
 		double time_elapsed_in_seconds = 0.0;
 
 		// Run the fuction 100 times and calculate total time elapsed
-		for (i = 0; i < 1; i++) {
+		for (i = 0; i < 100; i++) {
+
+			// Initialize myblock
+			init_block();
 
 			clock_t start = clock();
 			switch(j) {
@@ -140,10 +199,10 @@ int main(int argc, char const *argv[]) {
 					testD();
 					break;
 				case 4:
-					//testE();
+					testE();
 					break;
 				case 5:
-					//testF();
+					testF();
 					break;
 			}
 			clock_t end = clock();
@@ -151,7 +210,7 @@ int main(int argc, char const *argv[]) {
 		}
 
 		// Print the after execution time of 100 runs
-		printf("Time Elapsed test%d: %f secs\n", j, time_elapsed_in_seconds/1);
+		printf("Time Elapsed test%d: %f secs\n", j, time_elapsed_in_seconds/100);
 	}
 
 	return 0;
