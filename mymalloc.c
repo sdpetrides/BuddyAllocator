@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "mymalloc.h"
 
 typedef struct meta {
 	unsigned char allo : 1;		// 0000000_ - allocated
@@ -10,8 +11,6 @@ typedef struct meta {
 } Meta;
 
 void unpack(Meta * m, int pos);
-
-static char myblock[8192];
 
 /* Fills myblock with zeros and creates first metadata */
 void init_block() {
@@ -97,7 +96,7 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 
 	// Traverse heap to find block of correct size - algo(n)
 	int n = size_to_n(reqSize);
-	printf("n:      %d\n", n);
+	//printf("n:        %d\n", n);
 	int pos = 0;
 	unsigned char c = 0;
 	Meta * m = memset(&c, 0, 1);
@@ -108,8 +107,6 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 
 		// Debugging
 		if (m->size == 0) {
-			printf("m.size: %d\n", m->size);
-			printf("pos:    %d\n", pos);
 			exit(0);
 		}
 
@@ -120,12 +117,11 @@ void * mymalloc(size_t reqSize, char * file, int line) {
 				continue;
 			} else if (m->size == n) {		
 				// Allocate
-				printf("Allocate\n");
 				myblock[pos]+=1;
-				printf("Pos:    %d\n", (int)pos);
-				printf("M1:     %d\n", (int)myblock[pos]);
-				printf("Ptr:    0x%X\n\n", (int)&myblock+pos+1);
-				return &myblock+pos+1;
+				pos+=1;
+				//printf("Position: %d\n", pos);
+				//printf("Allocate: %p\n", (void*)((long int)&myblock+pos));
+				return (void*)((long int)&myblock+pos);
 			} else { 						
 				// Partition
 
@@ -168,8 +164,10 @@ void myfree(void * ptr, char * file, int line) {
 		fprintf(stderr, "Error: %s.%d\n", file, line);
 	}
 
-	// Get position and check if valid
-	int pos = (int)(ptr=&myblock-1);
+	//printf("Free:     %p\n", ptr);
+
+	// Get position
+	int pos = (int)(ptr-(void *)&myblock-1);
 
 	// Check if valid metadata location
 	if (pos%2 == 1 || myblock[pos] == 0) {
@@ -209,7 +207,7 @@ void myfree(void * ptr, char * file, int line) {
 
 			// Get position of other partner and read metadata
 			int pos2 = jump_back(m2->size,pos);
-			unpack(m2,pos);
+			unpack(m2,pos2);
 
 			// Merge or break
 			if (m2->allo || m2->size != m1->size) {
