@@ -33,9 +33,9 @@ void testA() {
 /* testB: malloc() 1 byte and immediately free it 3000 times in a row */
 void testB() {
 	int i = 0;
+	char * p;
 
 	while (i < 3000) {
-		char * p;
 		p = (char *)malloc(sizeof(char)*1);
 		free(p);
 		i++;
@@ -92,13 +92,14 @@ int main(int argc, char const *argv[]) {
 	init_block();
 
 	// Create function pointers for each function
-	void (*fptrA)() = &testA;
-	void (*fptrB)() = &testB;
+	//void (*fptrA)() = &testA;
+	//void (*fptrB)() = &testB;
 	//void (*fptrC)() = &testC;
 
 	// Create and initialize fptr array
-	void (**fptr)() = &fptrA;
-	fptr[1] = fptrB;
+	//void (*fptr)() = &testA;
+	//void (**fptr)() = &fptrA;
+	//fptr[1] = fptrB;
 	//fptr[2] = fptrC;
 
 	// Inititialize variables for workflow
@@ -111,13 +112,24 @@ int main(int argc, char const *argv[]) {
 		// Run the fuction 100 times and calculate total time elapsed
 		for (i = 0; i < 100; i++) {
 			clock_t start = clock();
-			(*fptr[j])();
+			switch(j) {
+				case 0:
+					testA();
+					break;
+				case 1:
+					testB();
+					break;
+			//case 0:
+			//	break;
+			//case 0:
+			//	break;
+			}
 			clock_t end = clock();
 			time_elapsed_in_seconds+=(end - start)/(double)CLOCKS_PER_SEC;
 		}
 
 		// Print the after execution time of 100 runs
-		printf("Time Elapsed: %f secs\n", time_elapsed_in_seconds/100);
+		printf("Time Elapsed test%d: %f secs\n", j, time_elapsed_in_seconds/100);
 	}
 
 	return 0;
